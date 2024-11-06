@@ -92,7 +92,7 @@ function scheduleRemoveUnusedData() {
           await RemoveUnusedData(parseInt(timeData.GetJam), parseInt(timeData.PreJam), 'change_1jam_', coinName, Array.from({ length: 24 }, (_, index) => index));
           await RemoveUnusedData(parseInt(timeData.Get2Jam), parseInt(timeData.PreGet2Jam), 'change_2jam_', coinName, Array.from({ length: 24 }, (_, index) => index));
       }
-  }, 6000); // Eksekusi setiap 6 detik
+  }, 2000); // Eksekusi setiap 6 detik
 }
 
 async function name(params) {

@@ -15,6 +15,7 @@ function CreateDir(DURATION, BUYORSELL, SUMMARYTYPE) {
     var dir = `./summary/${SUMMARYTYPE}/${DURATION}/${BUYORSELL}`;
     fs.mkdirSync(dir, {recursive: true});
     fs.mkdirSync(dir + '/tmp', {recursive: true});
+    return '';
 }
 
 async function SplitDb(data, SUMMARYTYPE) {
@@ -50,7 +51,7 @@ async function SplitDb(data, SUMMARYTYPE) {
                 `summary/${SUMMARYTYPE}/${GetDuration}/${BuyOrSell}-merge.json`,
                 MergeJsonData
             );
-
+            return resolve('')
         } catch  {
             return resolve({message: 'error', data: data})
         }
@@ -74,6 +75,7 @@ async function main(SUMMARYTYPE) {
 
     FindSellArray.map(d => SplitDb(d, SUMMARYTYPE))
     FindBuyArray.map(d => SplitDb(d, SUMMARYTYPE))
+    return '';
 
     // console.log(FindBuyArray) await client.quit();
 }
@@ -158,10 +160,11 @@ async function BuildAVG(SUMMARYTYPE, DURATION, BUYORSELL) {
             });
 
         //end add to DB OKX:SUMMARY
-
+        return '';
     }
 
     uniqueDataSell.map(d => GenerateSummary(d))
+    return '';
 }
 
 async function names(SUMMARYTYPE) {
@@ -177,40 +180,39 @@ async function names(SUMMARYTYPE) {
 
     await uniqueDataSell.map(async d => await BuildAVG(SUMMARYTYPE, d, "sell"))[0]
     await uniqueDataBuy.map(async d => await BuildAVG(SUMMARYTYPE, d, "buy"))[0]
+    return '';
 }
 
 function DeleteFolder() {
-
-    // Replace with the path of the folder you want to delete
     const folderPath = path.join(__dirname, 'summary');
 
-    // Delete the folder and its contents
-    fs.rm(folderPath, {
-        recursive: true,
-        force: true
-    }, async (err) => {
+    fs.rm(folderPath, { recursive: true, force: true }, (err) => {
         if (err) {
             console.error('Error deleting folder:', err);
-            await client.quit(); 
-            await insertData.quit();
-            process.exit(true);
         } else {
             console.log('Folder deleted successfully');
-            await client.quit(); 
-            await insertData.quit();
-            process.exit(true);
         }
+        client.quit();
+        insertData.quit();
+        process.exit(0); // Paksa keluar setelah semua operasi selesai
     });
 }
 
-async function GenerateAvg() {
+
+async function START() {
     await client.connect();
     await insertData.connect();
     await main("FREQ");
     await main("VOLCOIN");
     await names("FREQ")
     await names("VOLCOIN");    
-    DeleteFolder()
+    DeleteFolder();
+    return '';
+}
+
+async function GenerateAvg() {
+    await START()
+    return '';
 }
 
 module.exports = { GenerateAvg };

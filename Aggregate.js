@@ -172,7 +172,8 @@ async function InsertData(JsonArray) {
     f.minute_30_buy, 'sum_minute_30_buy',
     f.minute_60_buy, 'sum_minute_60_buy',
     f.minute_120_buy, 'sum_minute_120_buy',
-    f.overall_buy, 'sum_overall_buy'
+    f.overall_buy, 'sum_overall_buy',
+    Date.now()- JsonArray.ts,'delay_ms_aggrade'
 ).catch(err => console.log(err));
 
    return '';
