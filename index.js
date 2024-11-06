@@ -1,5 +1,4 @@
 const { Count } = require('./count');
 const {  CountAggregate } = require('./Aggregate');
 
-Count()
-CountAggregate()
+module.exports = { Count,CountAggregate };

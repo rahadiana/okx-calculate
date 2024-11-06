@@ -11,7 +11,7 @@ const client = new Redis({
 const FreqCounter = client;
 
 function Exit(err){
-  console.log('Redis Client Error',err)
+  console.log(`Redis Client Error data ${client}`,err)
   process.exit()
 }
 // Fungsi untuk menghubungkan ke Redis
@@ -92,14 +92,15 @@ function scheduleRemoveUnusedData() {
           await RemoveUnusedData(parseInt(timeData.GetJam), parseInt(timeData.PreJam), 'change_1jam_', coinName, Array.from({ length: 24 }, (_, index) => index));
           await RemoveUnusedData(parseInt(timeData.Get2Jam), parseInt(timeData.PreGet2Jam), 'change_2jam_', coinName, Array.from({ length: 24 }, (_, index) => index));
       }
-  }, 6000); // Eksekusi setiap 6 detik
+  }, 4000); // Eksekusi setiap 1 detik
 }
 
 async function name(params) {
     const coinList = await SpotCoin('asd');
 
     if (coinList.status === 200) {
-        const FilterList = coinList.data.map(d => d.instId)//.filter(d => d.includes("-USDT"));
+        
+        const FilterList = coinList.data.map(d => d.instId).filter(d => d.includes("USDT"));
 
         Tickers(FilterList, processFunction);
     } else {

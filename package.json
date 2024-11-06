@@ -1,13 +1,13 @@
 {
-  "name": "coba",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "@rahadiana/okx-calculate",
+  "version": "0.0.1",
+  "description": "okx",
+  "main": "./index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "rahadiana nugraha <rahadiana.nugraha@gmail.com>",
   "license": "ISC",
   "dependencies": {
     "@nusantaracode/exchange-time-converter": "github:rahadiana/exchange-time-converter",

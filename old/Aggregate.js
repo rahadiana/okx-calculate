@@ -96,7 +96,7 @@ async function InsertData(JsonArray) {
   const time = convertTime(JsonArray.ts);
 
   // Menggunakan Promise.all untuk menjalankan semua zscore Redis sekaligus
-  const [Minute_1_buy, Minute_5_buy, Minute_10_buy, Minute_15_buy, Minute_20_buy, Minute_30_buy, Minute_60_buy, Minute_120_buy,      
+  const [Minute_1_buy, Minute_5_buy, Minute_10_buy, Minute_15_buy, Minute_20_buy, Minute_30_buy, Minute_60_buy, Minute_120_buy,   
     Minute_1_sell, Minute_5_sell, Minute_10_sell, Minute_15_sell, Minute_20_sell, Minute_30_sell, Minute_60_sell, Minute_120_sell] = await Promise.all([
     FreqCounter.zscore(`COUNT:FREQ:buy:${time.year}:${time.month}:${time.date}:1MENIT:${time.GetJam+time.GetMenit}`, iniNamaKoin),
     FreqCounter.zscore(`COUNT:FREQ:buy:${time.year}:${time.month}:${time.date}:5MENIT:${time.GetJam+time.Get5Minutes}`, iniNamaKoin),
@@ -189,7 +189,6 @@ async function processFunction(message) {
       InsertData(uuu)
       GeneRateSummary(uuu)
     })
-
     }
 }
 
