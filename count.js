@@ -49,7 +49,7 @@ async function processFunction(message) {
       const r = Reverse(x);
       const time = convertTime(r.timestamp);
       const CoinName = 'OKX:SUMMARY:' + r.coin.toUpperCase();
-
+        
       // Menambahkan data ke Redis menggunakan zadd tanpa await
       client.zadd('OKX:COIN:LIST', r.change, r.coin.toUpperCase()).catch(err => console.log(err));
       client.expire(CoinName, 1000).catch(err => console.log(err));
