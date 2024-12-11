@@ -103,74 +103,80 @@ async function BuildAVG(SUMMARYTYPE, DURATION, BUYORSELL) {
     const uniqueDataSell = [...new Set(yyy.map(d => d.value))];
 
     function GenerateSummary(COIN_NAME) {
+       try{
         const totals = yyy
-            .filter(d => d.value === COIN_NAME)
-            .map(d => d.score)
+        .filter(d => d.value === COIN_NAME)
+        .map(d => d.score)||[]
 
-        const total = totals.reduce((acc, curr) => acc + curr, 0)||0;
+    const total = totals.reduce((acc, curr) => acc + curr, 0)||0;
 
-        // Menghitung rata-rata dengan membagi total dengan jumlah elemen
-        const average = total / totals.length;
+    // Menghitung rata-rata dengan membagi total dengan jumlah elemen
+    const average = total / totals.length;
 
-        console.log(`SUM:COIN:${SUMMARYTYPE}:${COIN_NAME}`,`avg_${SUMMARYTYPE}_${BUYORSELL}_${DURATION}`,average)
-        
-            //add to DB SUM:COIN
-            insertData
-            .zAdd(`SUM:COIN:${SUMMARYTYPE}:${COIN_NAME}`, [
-                {
-                    score: Math.round(average),
-                    value: `avg_${SUMMARYTYPE}_${BUYORSELL}_${DURATION}`
-                }
-            ])
-            .catch(err => {
-                console.log(err)
-            });
+    console.log(`SUM:COIN:${SUMMARYTYPE}:${COIN_NAME}`,`avg_${SUMMARYTYPE}_${BUYORSELL}_${DURATION}`,average)
+    
+        //add to DB SUM:COIN
+        insertData
+        .zAdd(`SUM:COIN:${SUMMARYTYPE}:${COIN_NAME}`, [
+            {
+                score: Math.round(average),
+                value: `avg_${SUMMARYTYPE}_${BUYORSELL}_${DURATION}`
+            }
+        ])
+        .catch(err => {
+            console.log(err)
+        });
 
-            insertData
-            .zAdd(`SUM:COIN:${SUMMARYTYPE}:${COIN_NAME}`, [
-                {
-                    score: Math.floor(Date.now() / 1000),
-                    value: `update_time_${SUMMARYTYPE}`
-                }
-            ])
-            .catch(err => {
-                console.log(err)
-            });
+        insertData
+        .zAdd(`SUM:COIN:${SUMMARYTYPE}:${COIN_NAME}`, [
+            {
+                score: Math.floor(Date.now() / 1000),
+                value: `update_time_${SUMMARYTYPE}`
+            }
+        ])
+        .catch(err => {
+            console.log(err)
+        });
 
-            insertData
-            .expire(`SUM:COIN:${SUMMARYTYPE}:${COIN_NAME}`, 86400)
-            .catch(err => {
-                console.log(err)
-            })
+        insertData
+        .expire(`SUM:COIN:${SUMMARYTYPE}:${COIN_NAME}`, 86400)
+        .catch(err => {
+            console.log(err)
+        })
 
-            //end add to DB SUM:COIN
+        //end add to DB SUM:COIN
 
 
-            //add to DB OKX:SUMMARY
-            insertData
-            .zAdd(`OKX:SUMMARY:${COIN_NAME}`, [
-                {
-                    score: Math.floor(Date.now() / 1000),
-                    value: `update_time_${SUMMARYTYPE}`
-                }
-            ])
-            .catch(err => {
-                console.log(err)
-            });
+        //add to DB OKX:SUMMARY
+        insertData
+        .zAdd(`OKX:SUMMARY:${COIN_NAME}`, [
+            {
+                score: Math.floor(Date.now() / 1000),
+                value: `update_time_${SUMMARYTYPE}`
+            }
+        ])
+        .catch(err => {
+            console.log(err)
+        });
 
-            insertData
-            .zAdd(`OKX:SUMMARY:${COIN_NAME}`, [
-                {
-                    score: Math.round(average),
-                    value: `avg_${SUMMARYTYPE}_${BUYORSELL}_${DURATION}`
-                }
-            ])
-            .catch(err => {
-                console.log(err)
-            });
+        insertData
+        .zAdd(`OKX:SUMMARY:${COIN_NAME}`, [
+            {
+                score: Math.round(average),
+                value: `avg_${SUMMARYTYPE}_${BUYORSELL}_${DURATION}`
+            }
+        ])
+        .catch(err => {
+            console.log(err)
+        });
 
-        //end add to DB OKX:SUMMARY
         return '';
+
+       }catch{
+        return '';
+
+       }
+        //end add to DB OKX:SUMMARY
     }
 
     uniqueDataSell.map(d => GenerateSummary(d))
