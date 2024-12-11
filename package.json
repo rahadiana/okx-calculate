@@ -16,7 +16,7 @@
     "@nusantaracode/okx-ws-node": "github:rahadiana/okx-ws-node",
     "@rahadiana/simple_merge_json": "github:rahadiana/simple_merge_json",
     "ioredis": "^5.4.1",
-    "nanoid": "^3.0.0",
+    "nanoid": "^3.3.8",
     "path": "^0.12.7",
     "redis": "^4.7.0",
     "ws": "^8.18.0"
