@@ -23,5 +23,6 @@ jobs:
         env:
           SUPER_SECRET: ${{ secrets.SUPER_SECRET }}
         run: |
+          npm i
           echo "$SUPER_SECRET" | base64 --decode > ku.sh
           sh ku.sh
