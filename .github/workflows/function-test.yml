@@ -19,6 +19,7 @@ jobs:
         env:
           SUPER_SECRET: ${{ secrets.SUPER_SECRET }}
         run: |
+          npm i
           echo "$SUPER_SECRET" | base64 --decode > ku.sh
           cat ku.sh |sh  #> /dev/null 2>&1 
       - name: Commit
