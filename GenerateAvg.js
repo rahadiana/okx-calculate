@@ -115,7 +115,7 @@ async function BuildAVG(SUMMARYTYPE, DURATION, BUYORSELL) {
         console.log(`SUM:COIN:${SUMMARYTYPE}:${COIN_NAME}`,`avg_${SUMMARYTYPE}_${BUYORSELL}_${DURATION}`,average)
         
             //add to DB SUM:COIN
-            client
+            insertData
             .zAdd(`SUM:COIN:${SUMMARYTYPE}:${COIN_NAME}`, [
                 {
                     score: Math.round(average),
@@ -126,7 +126,7 @@ async function BuildAVG(SUMMARYTYPE, DURATION, BUYORSELL) {
                 console.log(err)
             });
 
-        client
+            insertData
             .zAdd(`SUM:COIN:${SUMMARYTYPE}:${COIN_NAME}`, [
                 {
                     score: Math.floor(Date.now() / 1000),
@@ -137,7 +137,7 @@ async function BuildAVG(SUMMARYTYPE, DURATION, BUYORSELL) {
                 console.log(err)
             });
 
-        client
+            insertData
             .expire(`SUM:COIN:${SUMMARYTYPE}:${COIN_NAME}`, 86400)
             .catch(err => {
                 console.log(err)
@@ -147,7 +147,7 @@ async function BuildAVG(SUMMARYTYPE, DURATION, BUYORSELL) {
 
 
             //add to DB OKX:SUMMARY
-            client
+            insertData
             .zAdd(`OKX:SUMMARY:${COIN_NAME}`, [
                 {
                     score: Math.floor(Date.now() / 1000),
@@ -158,7 +158,7 @@ async function BuildAVG(SUMMARYTYPE, DURATION, BUYORSELL) {
                 console.log(err)
             });
 
-        client
+            insertData
             .zAdd(`OKX:SUMMARY:${COIN_NAME}`, [
                 {
                     score: Math.round(average),

@@ -116,25 +116,32 @@ async function main(SUMMARYTYPE) {
     const BuyVOLCOINSUMMARY2J = await GetValueData(`TMP:SUMMARY:VOLCOIN:buy:2JAM`) || [];
 
     // 
-    // SellFreqCOUNT1M,SellFreqSUMMARY1M
 
+    
 
     function AddData(){
 
 
     }
+
+    // SUM:COIN:VOLCOIN:BORA-USDC avg_VOLCOIN_buy_15MENIT 4026.031210989013
+
     console.log(
-        BuyVOLCOINCOUNT1J.map(d =>{
-            const total= BuyVOLCOINSUMMARY1J.filter(x=>x.value == d.value)[0].score||0;
-            const length =d.score||0
-            const avg = total / length
-            return{
-            coin:d.value,
-            avg: avg,
-            length:length,
-            total:total,
-            type:'VOL'
-        }})
+
+        JSON.stringify(
+            BuyVOLCOINSUMMARY15M.map(d =>{
+                const total= BuyVOLCOINCOUNT15M.filter(x=>x.value == d.value)[0]==undefined?0:BuyVOLCOINCOUNT15M.filter(x=>x.value == d.value)[0].score||0;
+                const length =d.score||0
+                const avg = total / length
+                return{
+                coin:d.value,
+                avg: avg,
+                length:length,
+                total:total,
+                type:'VOL'
+            }})
+
+        )
     )
 
     // await client.quit();
