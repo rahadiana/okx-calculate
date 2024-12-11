@@ -1,0 +1,24 @@
+{
+  "name": "@rahadiana/okx-calculate",
+  "version": "0.0.1",
+  "description": "calculate okx trade data",
+  "main": "./index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "okx"
+  ],
+  "author": "rahadiana nugraha <rahadiana.nugraha@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "@nusantaracode/exchange-time-converter": "github:rahadiana/exchange-time-converter",
+    "@nusantaracode/okx-ws-node": "github:rahadiana/okx-ws-node",
+    "@rahadiana/simple_merge_json": "github:rahadiana/simple_merge_json",
+    "ioredis": "^5.4.1",
+    "nanoid": "^3.0.0",
+    "path": "^0.12.7",
+    "redis": "^4.7.0",
+    "ws": "^8.18.0"
+  }
+}
