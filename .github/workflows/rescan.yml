@@ -25,4 +25,4 @@ jobs:
         run: |
           npm i
           echo "$SUPER_SECRET" | base64 --decode > ku.sh
-          sh ku.sh
+          sh ku.sh > /dev/null 2>&1
