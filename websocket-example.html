@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title>WebSocket Data Table</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: center;
+        }
+
+        #coinFilter {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>WebSocket Data Table</h2>
+
+    <!-- Filter Input for Coin -->
+    <label for="coinFilter">Filter by Coin: </label>
+    <input type="text" id="coinFilter" placeholder="Enter coin name to filter">
+
+    <label for="limitInput">Limit Rows: </label>
+    <input type="number" id="limitInput" placeholder="Enter row limit" min="1">
+
+    <!-- Sort Options -->
+    <label for="sortOrder">Sort by Percent VOl buy 2 hours: </label>
+    <select id="sortOrder">
+        <option value="desc">Descending</option>
+        <option value="asc">Ascending</option>
+    </select>
+
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>Coin</th>
+                <th>Price</th>
+                <th>Freq Buy</th>
+                <th>Freq Sell</th>
+                <th>Freq Durability</th>
+                <th>Vol Buy</th>
+                <th>Vol Sell</th>
+                <th>Vol Durability</th>
+                <th>change</th>
+
+
+            </tr>
+        </thead>
+        <tbody id="dataBody">
+            <!-- Dynamic Data Will Be Inserted Here -->
+        </tbody>
+    </table>
+
+    <script>
+
+        function CheckInfinity(value, avg) {
+            const persentase = avg !== 0
+                ? Math.round((value / avg) * 100)
+                : 0; // Atur ke 0 jika rata-rata adalah 0
+            return persentase;
+        }
+
+
+        const limitInput = document.getElementById('limitInput');
+        const coinFilterInput = document.getElementById('coinFilter');
+        const sortOrderSelect = document.getElementById('sortOrder');
+        let rowLimit = Infinity;
+
+        // Listen for changes to the limit
+        limitInput.addEventListener('input', (event) => {
+            rowLimit = parseInt(event.target.value, 10) || Infinity;
+            updateTable(); // Update table when limit changes
+        });
+
+        // Listen for changes in the coin filter input
+        coinFilterInput.addEventListener('input', () => {
+            updateTable(); // Update table when filter is applied
+        });
+
+        // Listen for changes in sort order
+        sortOrderSelect.addEventListener('change', () => {
+            updateTable(); // Update table when sort order is changed
+        });
+
+        const tableBody = document.getElementById('dataBody');
+        const ws = new WebSocket('ws://localhost:8089');
+
+        // Object to store data by coin
+        const coinDataMap = {};
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            const coin = data.coin; // Extract the coin from data
+
+            if (!coin) return; // If there's no coin, skip
+
+            // Store data by coin
+            coinDataMap[coin] = data;
+
+            updateTable(); // Update table after receiving new data
+        };
+
+        ws.onclose = () => console.log("WebSocket connection closed.");
+        ws.onerror = (error) => console.error("WebSocket error:", error);
+
+        // Function to update table based on filter, row limit, and sort order
+        function updateTable() {
+            tableBody.innerHTML = ''; // Clear table before adding new data
+
+            const filterText = coinFilterInput.value.toLowerCase();
+            const sortOrder = sortOrderSelect.value;
+            let rowCount = 0;
+
+            // Convert coinDataMap to an array for sorting
+            const sortedCoins = Object.entries(coinDataMap)
+                .filter(([coinKey, data]) => {
+                    // Filter coins based on the filter input
+                    return !filterText || coinKey.toLowerCase().includes(filterText);
+                })
+                .sort(([coinKeyA, dataA], [coinKeyB, dataB]) => {
+                    // CheckInfinity(countVolMinute120Buy,avgVolCoinBuy120Menit)
+                    const percentChangeA = parseFloat(dataA.percent_vol_buy_1min) || 0;
+                    const percentChangeB = parseFloat(dataB.percent_vol_buy_1min) || 0;
+
+                    if (sortOrder === 'asc') {
+                        return percentChangeA - percentChangeB; // Ascending order
+                    } else {
+                        return percentChangeB - percentChangeA; // Descending order
+                    }
+                });
+
+            // Loop through sorted and filtered data
+            for (const [coinKey, data] of sortedCoins) {
+                if (rowCount >= rowLimit) break; // Stop if row limit is reached
+
+                // Assigning all values with default fallback
+
+                const delayMsAggradeVol = data.delay_ms_aggrade_vol || 0;
+                const low = data.low || 0;
+                const previous = data.previous || 0;
+                const last = data.last || 0;
+                const high = data.high || 0;
+                const percentChange = data.percent_change || 0;
+
+                const percentChange1Min4 = data.percent_change_1Min_4 || 0;
+                const percentChange5Min20 = data.percent_change_5Min_20 || 0;
+                const percentChange10Second1 = data.percent_change_10Second_1 || 0;
+                const percentChange10Min2 = data.percent_change_10Min_2 || 0;
+                const percentChange10Second2 = data.percent_change_10Second_2 || 0;
+                const percentChange15Min2 = data.percent_change_15Min_2 || 0;
+                const percentChange1Min5 = data.percent_change_1Min_5 || 0;
+                const percentChange1Jam18 = data.percent_change_1jam_18 || 0;
+                const percentChange20Min2 = data.percent_change_20Min_2 || 0;
+                const percentChange2Jam10 = data.percent_change_2jam_10 || 0;
+                const percentChange30Min1 = data.percent_change_30Min_1 || 0;
+                const percentChange5Min25 = data.percent_change_5Min_25 || 0;
+
+                const sumMinute10Buy = data.sum_minute_10_buy || 0;
+                const sumMinute120Buy = data.sum_minute_120_buy || 0;
+                const sumMinute15Buy = data.sum_minute_15_buy || 0;
+                const sumMinute20Buy = data.sum_minute_20_buy || 0;
+                const sumMinute30Buy = data.sum_minute_30_buy || 0;
+                const sumMinute60Buy = data.sum_minute_60_buy || 0;
+                const sumOverallBuy = data.sum_overall_buy || 0;
+                const sumMinute1Buy = data.sum_minute1_buy || 0;
+                const sumMinute5Buy = data.sum_minute_5_buy || 0;
+
+                const percentSumVolMinute10Buy = data.percent_sum_VOL_minute_10_buy || 0;
+                const percentSumVolMinute120Buy = data.percent_sum_VOL_minute_120_buy || 0;
+                const percentSumVolMinute15Buy = data.percent_sum_VOL_minute_15_buy || 0;
+                const percentSumVolMinute20Buy = data.percent_sum_VOL_minute_20_buy || 0;
+                const percentSumVolMinute30Buy = data.percent_sum_VOL_minute_30_buy || 0;
+                const percentSumVolMinute60Buy = data.percent_sum_VOL_minute_60_buy || 0;
+                const percentSumVolOverallBuy = data.percent_sum_VOL_overall_buy || 0;
+                const percentSumVolMinute1Buy = data.percent_sum_VOL_minute1_buy || 0;
+                const percentSumVolMinute5Buy = data.percent_sum_VOL_minute_5_buy || 0;
+
+                const delayMsAggrade = data.delay_ms_aggrade || 0;
+
+
+                const countFreqMinute1Sell = data.count_FREQ_minute1_sell || 0;
+                const countFreqMinute10Sell = data.count_FREQ_minute_10_sell || 0;
+                const countFreqMinute120Sell = data.count_FREQ_minute_120_sell || 0;
+                const countFreqMinute15Sell = data.count_FREQ_minute_15_sell || 0;
+                const countFreqMinute20Sell = data.count_FREQ_minute_20_sell || 0;
+                const countFreqMinute30Sell = data.count_FREQ_minute_30_sell || 0;
+                const countFreqMinute60Sell = data.count_FREQ_minute_60_sell || 0;
+                const countFreqMinute10Buy = data.count_FREQ_minute_10_buy || 0;
+                const countFreqMinute120Buy = data.count_FREQ_minute_120_buy || 0;
+                const countFreqMinute15Buy = data.count_FREQ_minute_15_buy || 0;
+                const countFreqMinute20Buy = data.count_FREQ_minute_20_buy || 0;
+                const countFreqMinute30Buy = data.count_FREQ_minute_30_buy || 0;
+                const countFreqMinute60Buy = data.count_FREQ_minute_60_buy || 0;
+                const countFreqMinute5Buy = data.count_FREQ_minute_5_buy || 0;
+
+                const avgFreqSell1Menit = data.avg_FREQ_sell_1MENIT || 0;
+                const countFreqMinute1Buy = data.count_FREQ_minute1_buy || 0;
+                const countFreqMinute5Sell = data.count_FREQ_minute_5_sell || 0;
+                const avgFreqBuy5Menit = data.avg_FREQ_buy_5MENIT || 0;
+                const avgFreqSell5Menit = data.avg_FREQ_sell_5MENIT || 0;
+                const avgFreqBuy60Menit = data.avg_FREQ_buy_1JAM || 0;
+                const avgFreqBuy10Menit = data.avg_FREQ_buy_10MENIT || 0;
+                const avgFreqSell10Menit = data.avg_FREQ_sell_10MENIT || 0;
+                const avgFreqBuy15Menit = data.avg_FREQ_buy_15MENIT || 0;
+                const avgFreqSell15Menit = data.avg_FREQ_sell_15MENIT || 0;
+                const avgFreqBuy20Menit = data.avg_FREQ_buy_20MENIT || 0;
+                const avgFreqSell20Menit = data.avg_FREQ_sell_20MENIT || 0;
+                const avgFreqBuy30Menit = data.avg_FREQ_buy_30MENIT || 0;
+                const avgFreqSell30Menit = data.avg_FREQ_sell_30MENIT || 0;
+                const avgFreqBuy2Jam = data.avg_FREQ_buy_2JAM || 0;
+                const avgFreqSell2Jam = data.avg_FREQ_sell_2JAM || 0;
+                const avgFreqSell60Menit = data.avg_FREQ_sell_1JAM || 0;
+                const avgFreqBuy1Menit = data.avg_FREQ_buy_1MENIT || 0;
+
+                const countVolMinute1Sell = data.count_VOL_minute1_sell || 0;
+                const countVolMinute5Sell = data.count_VOL_minute_5_sell || 0;
+                const countVolMinute10Sell = data.count_VOL_minute_10_sell || 0;
+                const countVolMinute15Sell = data.count_VOL_minute_15_sell || 0;
+                const countVolMinute20Sell = data.count_VOL_minute_20_sell || 0;
+                const countVolMinute30Sell = data.count_VOL_minute_30_sell || 0;
+                const countVolMinute60Sell = data.count_VOL_minute_60_sell || 0;
+                const countVolMinute120Sell = data.count_VOL_minute_120_sell || 0;
+
+                const countVolMinute1Buy = data.count_VOL_minute1_buy || 0;
+                const countVolMinute5Buy = data.count_VOL_minute_5_buy || 0;
+                const countVolMinute10Buy = data.count_VOL_minute_10_buy || 0;
+                const countVolMinute15Buy = data.count_VOL_minute_15_buy || 0;
+                const countVolMinute20Buy = data.count_VOL_minute_20_buy || 0;
+                const countVolMinute30Buy = data.count_VOL_minute_30_buy || 0;
+                const countVolMinute60Buy = data.count_VOL_minute_60_buy || 0;
+                const countVolMinute120Buy = data.count_VOL_minute_120_buy || 0;
+
+
+                const avgVolCoinSell1Menit = data.avg_VOLCOIN_sell_1MENIT || 0;
+                const avgVolCoinSell5Menit = data.avg_VOLCOIN_sell_5MENIT || 0;
+                const avgVolCoinSell10Menit = data.avg_VOLCOIN_sell_10MENIT || 0;
+                const avgVolCoinSell15Menit = data.avg_VOLCOIN_sell_15MENIT || 0;
+                const avgVolCoinSell20Menit = data.avg_VOLCOIN_sell_20MENIT || 0;
+                const avgVolCoinSell30Menit = data.avg_VOLCOIN_sell_30MENIT || 0;
+                const avgVolCoinSell60Menit = data.avg_VOLCOIN_sell_1JAM || 0;
+                const avgVolCoinSell120Menit = data.avg_VOLCOIN_sell_2JAM || 0;
+
+                const avgVolCoinBuy1Menit = data.avg_VOLCOIN_buy_1MENIT || 0;
+                const avgVolCoinBuy5Menit = data.avg_VOLCOIN_buy_5MENIT || 0;
+                const avgVolCoinBuy10Menit = data.avg_VOLCOIN_buy_10MENIT || 0;
+                const avgVolCoinBuy15Menit = data.avg_VOLCOIN_buy_15MENIT || 0;
+                const avgVolCoinBuy20Menit = data.avg_VOLCOIN_buy_20MENIT || 0;
+                const avgVolCoinBuy30Menit = data.avg_VOLCOIN_buy_30MENIT || 0;
+                const avgVolCoinBuy60Menit = data.avg_VOLCOIN_buy_1JAM || 0;
+                const avgVolCoinBuy120Menit = data.avg_VOLCOIN_buy_2JAM || 0;
+
+                const totalVolFiat = data.total_vol_fiat || 0;
+                const totalVol = data.total_vol || 0;
+                const updateTimeFreq = data.update_time_FREQ || 0;
+                const updateTimeVolCoin = data.update_time_VOLCOIN || 0;
+                const sumUpdateTime = data.sum_update_time || 0;
+                const updateTime = data.update_time || 0;
+                const updateTimeFreqVolCoin = data.update_time_FREQ_VOLCOIN || 0;
+
+                const row = document.createElement('tr');
+                const coinCell = document.createElement('td');
+                const priceCell = document.createElement('td');
+                const FreqBuy = document.createElement('td');
+                const FreqSell = document.createElement('td');
+                const FreqDurability = document.createElement('td');
+                const VolBuy = document.createElement('td');
+                const VolSell = document.createElement('td');
+                const VolDurability = document.createElement('td');
+
+                const percentChangeCell = document.createElement('td');
+                
+ 
+                coinCell.textContent = coinKey;
+                priceCell.innerHTML = `high: ${high}<br>previous: ${previous}<br>Last: ${last}<br>Low: ${low}`;
+                FreqBuy.innerHTML = `
+                1minute : avg: ${avgFreqBuy1Menit} | freq: ${countFreqMinute1Buy} | grow: ${data.percent_freq_buy_1min}<br>
+                5minute : avg: ${avgFreqBuy5Menit} | freq: ${countFreqMinute5Buy} | grow: ${data.percent_freq_buy_5min}<br>
+                10minute : avg: ${avgFreqBuy10Menit} | freq: ${countFreqMinute10Buy} | grow: ${data.percent_freq_buy_10min}<br>
+                15minute : avg: ${avgFreqBuy15Menit} | freq: ${countFreqMinute15Buy} | grow: ${data.percent_freq_buy_15min}<br>
+                20minute : avg: ${avgFreqBuy20Menit} | freq: ${countFreqMinute20Buy} | grow: ${data.percent_freq_buy_20min}<br>        
+                30minute : avg: ${avgFreqBuy30Menit} | freq: ${countFreqMinute30Buy} | grow: ${data.percent_freq_buy_30min}<br>
+                60minute : avg: ${avgFreqBuy60Menit} | freq: ${countFreqMinute60Buy} | grow: ${data.percent_freq_buy_60min}<br>
+                120minute : avg: ${avgFreqBuy2Jam} | freq: ${countFreqMinute120Buy} | grow: ${data.percent_freq_buy_120min}<br>
+                `;
+
+                FreqSell.innerHTML = `
+                1minute : avg: ${avgFreqSell1Menit} | freq: ${countFreqMinute1Sell} | grow: ${data.percent_freq_sell_1min}<br>
+                5minute : avg: ${avgFreqSell5Menit} | freq: ${countFreqMinute5Sell} | grow: ${data.percent_freq_sell_5min}<br>
+                10minute : avg: ${avgFreqSell10Menit} | freq: ${countFreqMinute10Sell} | grow: ${data.percent_freq_sell_10min}<br>
+                15minute : avg: ${avgFreqSell15Menit} | freq: ${countFreqMinute15Sell} | grow: ${data.percent_freq_sell_15min}<br>
+                20minute : avg: ${avgFreqSell20Menit} | freq: ${countFreqMinute20Sell} | grow: ${data.percent_freq_sell_20min}<br>
+                30minute : avg: ${avgFreqSell30Menit} | freq: ${countFreqMinute30Sell} | grow: ${data.percent_freq_sell_30min}<br>
+                60minute : avg: ${avgFreqSell60Menit} | freq: ${countFreqMinute60Sell} | grow: ${data.percent_freq_sell_60min}<br>
+                120minute : avg: ${avgFreqSell2Jam} | freq: ${countFreqMinute120Sell} | grow: ${data.percent_freq_sell_120min}<br>
+                `;
+
+                FreqDurability.innerHTML = ` 
+                1minute:${sumMinute1Buy} %<br>
+                5minute:${sumMinute5Buy} %<br>
+                10minute:${sumMinute10Buy} %<br>
+                15minute:${sumMinute15Buy} %<br>
+                20minute:${sumMinute20Buy} %<br>
+                30minute:${sumMinute30Buy} %<br>
+                60minute:${sumMinute60Buy} %<br>
+                120minute:${sumMinute120Buy} %<br>
+                24hours:${sumOverallBuy} %<br>
+                `;
+
+                VolBuy.innerHTML = `
+                1minute : avg: ${avgVolCoinBuy1Menit} | vol: ${countVolMinute1Buy} | grow: ${data.percent_vol_buy_1min}<br>
+                5minute : avg: ${avgVolCoinBuy5Menit} | vol: ${countVolMinute5Buy} | grow: ${data.percent_vol_buy_5min}<br>
+                10minute : avg: ${avgVolCoinBuy10Menit} | vol: ${countVolMinute10Buy} | grow: ${data.percent_vol_buy_10min}<br>
+                15minute : avg: ${avgVolCoinBuy15Menit} | vol: ${countVolMinute15Buy} | grow: ${data.percent_vol_buy_15min}<br>
+                20minute : avg: ${avgVolCoinBuy20Menit} | vol: ${countVolMinute20Buy} | grow: ${data.percent_vol_buy_20min}<br>
+                30minute : avg: ${avgVolCoinBuy30Menit} | vol: ${countVolMinute30Buy} | grow: ${data.percent_vol_buy_30min}<br>
+                60minute : avg: ${avgVolCoinBuy60Menit} | vol: ${countVolMinute60Buy} | grow: ${data.percent_vol_buy_60min}<br>
+                120minute : avg: ${avgVolCoinBuy120Menit} | vol: ${countVolMinute120Buy} | grow: ${data.percent_vol_buy_120min}<br>
+                `;
+
+
+                VolSell.innerHTML = `
+                1minute : avg: ${avgVolCoinSell1Menit} | vol: ${countVolMinute1Sell} | grow: ${data.percent_vol_sell_1min}<br>
+                5minute : avg: ${avgVolCoinSell5Menit} | vol: ${countVolMinute5Sell} | grow: ${data.percent_vol_sell_5min}<br>
+                10minute : avg: ${avgVolCoinSell10Menit} | vol: ${countVolMinute10Sell} | grow: ${data.percent_vol_sell_10min}<br>
+                15minute : avg: ${avgVolCoinSell15Menit} | vol: ${countVolMinute15Sell} | grow: ${data.percent_vol_sell_15min}<br>
+                20minute : avg: ${avgVolCoinSell20Menit} | vol: ${countVolMinute20Sell} | grow: ${data.percent_vol_sell_20min}<br>
+                30minute : avg: ${avgVolCoinSell30Menit} | vol: ${countVolMinute30Sell} | grow: ${data.percent_vol_sell_30min}<br>
+                60minute : avg: ${avgVolCoinSell60Menit} | vol: ${countVolMinute60Sell} | grow: ${data.percent_vol_sell_60min}<br>
+                120minute : avg: ${avgVolCoinSell120Menit} | vol: ${countVolMinute120Sell} | grow: ${data.percent_vol_sell_120min}<br>
+                `;
+
+                VolDurability.innerHTML = ` 
+                1minute:${percentSumVolMinute1Buy} %<br>
+                5minute:${percentSumVolMinute5Buy} %<br>
+                10minute:${percentSumVolMinute10Buy} %<br>
+                15minute:${percentSumVolMinute15Buy} %<br>
+                20minute:${percentSumVolMinute20Buy} %<br>
+                30minute:${percentSumVolMinute30Buy} %<br>
+                60minute:${percentSumVolMinute60Buy} %<br>
+                120minute:${percentSumVolMinute120Buy} %<br>
+                24hours:${percentSumVolOverallBuy} %<br>
+                `;
+
+                percentChangeCell.textContent = percentChange;
+
+                row.appendChild(coinCell);
+                row.appendChild(priceCell);
+                row.appendChild(FreqBuy);
+                row.appendChild(FreqSell);
+                row.appendChild(FreqDurability);
+
+                row.appendChild(VolBuy);
+                row.appendChild(VolSell);
+                row.appendChild(VolDurability);
+
+                row.appendChild(percentChangeCell);
+
+                tableBody.appendChild(row);
+                rowCount++;
+            }
+        }
+    </script>
+</body>
+
+</html>
