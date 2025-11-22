@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  bridge:
+    build: .
+    command: ["subscribe.js", "redis:6379"]
+    depends_on:
+      - redis
+    ports:
+      - "8089:8089"
+    volumes:
+      - ./:/usr/src/app
+
+  publisher:
+    build: .
+    command: ["PublishData.js", "redis:6379"]
+    depends_on:
+      - redis
+    volumes:
+      - ./:/usr/src/app
+
+  aggregator:
+    build: .
+    command: ["Aggregate.js", "redis:6379"]
+    depends_on:
+      - redis
+    volumes:
+      - ./:/usr/src/app
+
+  count:
+    build: .
+    command: ["count.js", "redis:6379"]
+    depends_on:
+      - redis
+    volumes:
+      - ./:/usr/src/app
+
+  generateavg:
+    build: .
+    # Run GenerateAvg.js every 3 minutes (180 seconds)
+    command: ["sh", "-c", "while true; do node GenerateAvg.js redis:6379; sleep 180; done"]
+    depends_on:
+      - redis
+    volumes:
+      - ./:/usr/src/app
